@@ -130,8 +130,8 @@ export const useConfigurationPanelStore = create<ConfigurationPanelStore>(
 
     loadInitialConfig: async () => {
       try {
-        const [storedWidth, storedFps, storedQuality] = await Promise.all([
-          storageAdapter.getWidth(),
+        // Only FPS and quality persist across videos (not width/height/duration)
+        const [storedFps, storedQuality] = await Promise.all([
           storageAdapter.getFps(),
           storageAdapter.getQuality()
         ]);
@@ -147,7 +147,7 @@ export const useConfigurationPanelStore = create<ConfigurationPanelStore>(
             : undefined;
 
         const initialStateFromStorage = getInitialState(currentMetadata, {
-          width: storedWidth,
+          width: null, // always fresh per video
           framerate: storedFps,
           quality: storedQuality
         });
@@ -158,7 +158,7 @@ export const useConfigurationPanelStore = create<ConfigurationPanelStore>(
       }
     },
 
-    handleInputChange: (payload) =>
+    handleInputChange: (payload) => {
       set((state) => {
         const { name, value } = payload;
         const newState = { ...state, [name]: value };
@@ -170,7 +170,16 @@ export const useConfigurationPanelStore = create<ConfigurationPanelStore>(
         }
 
         return newState;
-      }),
+      });
+
+      // Only FPS and quality stick across videos (width/height/duration stay per-video)
+      const { name, value } = payload;
+      if (name === 'framerate' && typeof value === 'number') {
+        storageAdapter.setFps(value).catch(() => {});
+      } else if (name === 'quality' && typeof value === 'number') {
+        storageAdapter.setQuality(value).catch(() => {});
+      }
+    },
 
     handleVideoLoadedData: (payload) =>
       set((state) => {

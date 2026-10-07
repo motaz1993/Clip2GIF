@@ -12,11 +12,9 @@ Works on YouTube, Twitter/X, Vimeo, Twitch, Facebook, local video files, and ess
 
 - **Works on all websites** — not limited to a single platform
 - Full editor with timeline, start time, duration, width, FPS, and quality
-- **Quick GIF** — right-click the page → “Quick GIF” for one-click convert + auto-download
-- Fully editable Quick defaults:
-  - Start from current time, beginning of video, or entire video
-  - Custom duration, or “until end of video”
-- Settings are remembered between sessions
+- **Quick GIF** — right-click the page → “Quick GIF”, or press **Alt+Shift+G**
+- Fully editable Quick defaults (start mode + duration)
+- **FPS and quality are remembered** between videos (width, height, and duration stay per-video)
 - Supports **Firefox**, **Chrome**, **Edge**, **Brave**, **Opera**, and other Chromium browsers
 - 100% local processing — nothing is uploaded
 
@@ -56,9 +54,30 @@ Built packages appear in `packages/extension/.output/`.
 
 1. Open any page with a video.
 2. **Full editor:** click the Clip2GIF toolbar icon, or right-click the page → **Create GIF…**
-3. **Quick mode:** right-click the page → **Quick GIF**  
-   Uses your saved presets and downloads automatically.
-4. In the popup you can set width, FPS, quality, and the Quick GIF defaults (start mode + duration).
+3. **Quick mode:**
+   - Right-click the page → **Quick GIF**, or
+   - Press **Alt+Shift+G**
+4. In the popup, set **FPS** and **quality** once — they are saved automatically for every next video.
+5. Width, height, start time, and duration are chosen per video (they do not stick).
+
+---
+
+## Keyboard shortcut
+
+| Action | Default shortcut |
+|--------|------------------|
+| Quick GIF | **Alt+Shift+G** |
+
+### Change the shortcut
+
+**Firefox**
+1. Open the menu → **Add-ons and themes** (`about:addons`)
+2. Click the gear icon → **Manage Extension Shortcuts**
+3. Find **Clip2GIF** → **Quick GIF** and set your preferred keys
+
+**Chrome / Edge / Brave**
+1. Open `chrome://extensions/shortcuts` (or `edge://extensions/shortcuts`)
+2. Find **Clip2GIF** → **Quick GIF** and set your preferred keys
 
 ---
 
@@ -69,7 +88,7 @@ Built packages appear in `packages/extension/.output/`.
 | Start from | Current time · Beginning of video · Entire video |
 | Duration | Any number of seconds, or **0 = until end of video** |
 
-Width, FPS, and Quality from the main controls are also used for Quick GIFs.
+Saved **FPS** and **quality** are always used for Quick GIFs. Width is taken from your last editor choice only when available; otherwise a sensible default is used per video.
 
 ---
 
@@ -94,7 +113,8 @@ The original GIFit made creating GIFs from web videos simple and reliable. This 
 
 - Extended to work on **all websites** (beyond a single platform)
 - Rebranded as Clip2GIF with a refreshed look
-- Added **Quick GIF** mode with fully editable presets
+- Added **Quick GIF** mode (context menu + **Alt+Shift+G**, shortcut is user-editable)
+- FPS and quality persist across videos
 - Multi-browser packaging for easier distribution
 - Privacy-focused (no analytics)
 

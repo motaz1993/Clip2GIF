@@ -14,6 +14,27 @@ const logger = createLogger('Background');
 const CONTEXT_MENU_ID = 'clip2gif:create-gif';
 const QUICK_MENU_ID = 'clip2gif:quick-gif';
 
+async function runQuickGif(tabId: number) {
+  const [w, f, q, startMode, duration] = await Promise.all([
+    Promise.resolve(420),
+    storedConfig.fps.getValue(),
+    storedConfig.quality.getValue(),
+    storedConfig.quickStartMode.getValue(),
+    storedConfig.quickDuration.getValue()
+  ]);
+
+  await browser.tabs.sendMessage(tabId, {
+    type: 'QUICK_GIF',
+    config: {
+      width: 420, // per-video; not persisted
+      fps: f ?? 10,
+      quality: q ?? 5,
+      startMode: startMode ?? 'current',
+      durationMs: duration ?? 0
+    }
+  });
+}
+
 export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(() => {
     browser.contextMenus.create({
@@ -45,27 +66,25 @@ export default defineBackground(() => {
 
     if (info.menuItemId === QUICK_MENU_ID) {
       try {
-        const [w, f, q, startMode, duration] = await Promise.all([
-          storedConfig.width.getValue(),
-          storedConfig.fps.getValue(),
-          storedConfig.quality.getValue(),
-          storedConfig.quickStartMode.getValue(),
-          storedConfig.quickDuration.getValue()
-        ]);
-
-        await browser.tabs.sendMessage(tab.id, {
-          type: 'QUICK_GIF',
-          config: {
-            width: w ?? 420,
-            fps: f ?? 10,
-            quality: q ?? 5,
-            startMode: startMode ?? 'current',
-            durationMs: duration ?? 0 // 0 = until end
-          }
-        });
+        await runQuickGif(tab.id);
       } catch (err) {
         logger.error('Quick GIF failed', err);
       }
+    }
+  });
+
+  // Keyboard shortcut: Alt+Shift+G → Quick GIF
+  // (Toolbar Shift/Ctrl+click is not available when a popup is attached)
+  browser.commands?.onCommand.addListener(async (command) => {
+    if (command !== 'quick-gif') return;
+    try {
+      const [tab] = await browser.tabs.query({
+        active: true,
+        currentWindow: true
+      });
+      if (tab?.id) await runQuickGif(tab.id);
+    } catch (err) {
+      logger.error('Quick GIF command failed', err);
     }
   });
 
@@ -84,6 +103,8 @@ function updateActionState(tabId: number | undefined) {
   if (!tabId) return;
   const action = getExtensionAction();
   if (action?.enable) action.enable(tabId);
-  browser.contextMenus.update(CONTEXT_MENU_ID, { enabled: true }).catch(() => {});
+  browser.contextMenus
+    .update(CONTEXT_MENU_ID, { enabled: true })
+    .catch(() => {});
   browser.contextMenus.update(QUICK_MENU_ID, { enabled: true }).catch(() => {});
 }

@@ -20,7 +20,8 @@ export default defineConfig({
   manifest: {
     name: 'Clip2GIF',
     version: rootPkg.version,
-    description: 'Create GIFs from any video on the web. Select a clip, adjust settings, and download instantly.',
+    description:
+      'Create GIFs from any video on the web. Select a clip, adjust settings, and download instantly.',
     permissions: ['storage', 'contextMenus'],
     host_permissions: ['<all_urls>'],
     content_security_policy: {
@@ -32,10 +33,23 @@ export default defineConfig({
         matches: ['<all_urls>']
       }
     ],
+    commands: {
+      'quick-gif': {
+        suggested_key: {
+          default: 'Alt+Shift+G',
+          mac: 'Alt+Shift+G'
+        },
+        description: 'Quick GIF – convert using saved FPS & quality'
+      }
+    },
     browser_specific_settings: {
       gecko: {
         id: 'clip2gif@local',
-        strict_min_version: '109.0'
+        strict_min_version: '109.0',
+        // @ts-expect-error required by Firefox AMO
+        data_collection_permissions: {
+          required: ['none']
+        }
       }
     }
   },
@@ -51,13 +65,15 @@ export default defineConfig({
     resolve: {
       alias: {
         '@shared': path.resolve(__dirname, '../shared/src'),
-        '@clip2gif/shared': path.resolve(__dirname, '../shared/src'),
         '@clip2gif/shared': path.resolve(__dirname, '../shared/src')
       }
     }
   }),
 
   autoIcons: {
-    baseIconPath: path.resolve(__dirname, '../shared/src/assets/clip2gif-icon.svg')
+    baseIconPath: path.resolve(
+      __dirname,
+      '../shared/src/assets/clip2gif-icon.svg'
+    )
   }
 });

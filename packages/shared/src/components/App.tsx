@@ -82,7 +82,7 @@ export function App() {
       setName(name);
 
       // Persist the settings upon generation
-      storageAdapter.setWidth(config.width).catch(() => {});
+      // width is per-video, not persisted
       storageAdapter.setFps(config.framerate).catch(() => {});
       storageAdapter.setQuality(config.quality).catch(() => {});
 
