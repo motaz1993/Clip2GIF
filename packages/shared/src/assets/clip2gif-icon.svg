@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- film strip -->
+  <rect x="22" y="32" width="52" height="64" rx="6" fill="white" fill-opacity="0.95"/>
+  <rect x="28" y="38" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="28" y="52" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="28" y="66" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="28" y="80" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="58" y="38" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="58" y="52" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="58" y="66" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <rect x="58" y="80" width="10" height="8" rx="1.5" fill="#0ea5e9"/>
+  <!-- arrow -->
+  <path d="M78 48c12 0 22 8 26 18" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M98 58l12 8-12 8" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- GIF badge -->
+  <rect x="72" y="72" width="36" height="22" rx="6" fill="white"/>
+  <text x="90" y="88" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="12" fill="#0ea5e9">GIF</text>
+</svg>

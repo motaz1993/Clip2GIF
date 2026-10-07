@@ -1,0 +1,21 @@
+{
+  "name": "clip2gif",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/extension",
+    "packages/shared"
+  ],
+  "scripts": {
+    "extension:dev": "npm run dev -w @clip2gif/extension",
+    "extension:dev:firefox": "npm run dev:firefox -w @clip2gif/extension",
+    "extension:build": "npm run build -w @clip2gif/extension",
+    "extension:build:firefox": "npm run build:firefox -w @clip2gif/extension",
+    "extension:zip": "npm run zip -w @clip2gif/extension",
+    "extension:zip:firefox": "npm run zip:firefox -w @clip2gif/extension"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "type": "module"
+}

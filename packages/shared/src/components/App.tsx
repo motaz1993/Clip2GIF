@@ -1,0 +1,176 @@
+import css from './App.module.css';
+
+import { useCallback, useEffect } from 'react';
+
+import { AppLogo } from './AppLogo/AppLogo';
+import { ConfigurationPanel } from '../features/editor/components/ConfigurationPanel/ConfigurationPanel';
+import { GifPreview } from '@shared/features/editor/components/GifPreview/GifPreview';
+import { ProcessingPanel } from '@shared/features/editor/components/ProcessingPanel/ProcessingPanel';
+import { ResultPanel } from '@shared/features/editor/components/ResultPanel/ResultPanel';
+
+import { useAppStore } from '@shared/stores/appStore';
+import {
+  // useConfigurationPanelStore,
+  ConfigState
+} from '@shared/features/editor/stores/configurationPanelStore';
+import { useGifStore } from '@shared/features/generator/stores/gifGeneratorStore';
+import { useConfigurationPanelStore } from '@shared/features/editor/stores/configurationPanelStore';
+
+import BugIcon from '@shared/assets/bug.svg?react';
+
+import { useAdapters, useAnalytics } from '@shared/adapters/context';
+
+export function App() {
+  const {
+    gif: gifAdapter,
+    getVideoTitle,
+    storage: storageAdapter
+  } = useAdapters();
+  const analytics = useAnalytics();
+  const status = useAppStore((state) => state.status);
+  const setStatus = useAppStore((state) => state.setStatus);
+  const setName = useGifStore((state) => state.setName);
+  const createGif = useGifStore((state) => state.createGif);
+  const updateProgress = useGifStore((state) => state.updateProgress);
+  const complete = useGifStore((state) => state.complete);
+  const setError = useGifStore((state) => state.setError);
+  const previewImage = useConfigurationPanelStore(
+    (state) => state.previewImage
+  );
+  const width = useConfigurationPanelStore((state) => state.width);
+  const height = useConfigurationPanelStore((state) => state.height);
+
+  // Listen for messages from content script via adapter
+  useEffect(() => {
+    gifAdapter.setCallbacks({
+      onProgress: (progress, frameCount, frameDataUrl, stage) => {
+        updateProgress(progress, frameCount, frameDataUrl, stage);
+      },
+      onComplete: (data) => {
+        complete(data);
+        setStatus('generated');
+      },
+      onError: (error) => {
+        setError(error);
+      }
+    });
+
+    return () => {
+      // Optional: clear callbacks or destroy adapter if needed
+      // gifAdapter.destroy?.();
+    };
+  }, [gifAdapter, updateProgress, complete, setError, setStatus]);
+
+  const handleSubmit = useCallback(
+    async function handleSubmit(config: ConfigState) {
+      const start = config.start; // ms
+      const end = start + config.duration; // ms
+      const name = await getVideoTitle();
+
+      const gifConfig = {
+        name,
+        quality: config.quality,
+        width: config.width,
+        height: config.height,
+        start,
+        end,
+        fps: config.framerate
+      };
+
+      // 1. Update UI state
+      createGif(gifConfig);
+      setName(name);
+
+      // Persist the settings upon generation
+      storageAdapter.setWidth(config.width).catch(() => {});
+      storageAdapter.setFps(config.framerate).catch(() => {});
+      storageAdapter.setQuality(config.quality).catch(() => {});
+
+      analytics.track('gif_generation_started', gifConfig);
+      setStatus('generating');
+
+      // 2. Trigger generation via adapter
+      try {
+        await gifAdapter.createGif(gifConfig);
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Failed to start generation';
+        setError(message);
+      }
+    },
+    [
+      createGif,
+      setName,
+      setStatus,
+      gifAdapter,
+      getVideoTitle,
+      storageAdapter,
+      setError,
+      analytics
+    ]
+  );
+
+  const currentFrame = useGifStore((state) => state.currentFrame);
+  const result = useGifStore((state) => state.result);
+
+  let currentPreviewImage = previewImage;
+  if (status === 'generating') {
+    currentPreviewImage = currentFrame ?? previewImage;
+  } else if (status === 'generated') {
+    currentPreviewImage = result?.dataUrl ?? previewImage;
+  }
+
+  return (
+    <div className={css.app} data-status={status}>
+      <header>
+        <AppLogo />
+      </header>
+      <main className={css.main}>
+        <section className={css.preview}>
+          <GifPreview
+            previewImage={currentPreviewImage}
+            width={width}
+            height={height}
+            status={status}
+          />
+        </section>
+
+        <section className={css.panel} aria-live="polite">
+          {status === 'configuring' && (
+            <div className={css.configuring}>
+              <ConfigurationPanel onSubmit={handleSubmit} />
+            </div>
+          )}
+          {status === 'generating' && (
+            <div className={css.processing}>
+              <ProcessingPanel />
+            </div>
+          )}
+          {status === 'generated' && (
+            <div className={css.generated}>
+              <ResultPanel />
+            </div>
+          )}
+        </section>
+      </main>
+      <footer className={css.footer}>
+        <a
+          className={css.credit}
+          href="https://buymeacoffee.com/touched"
+          target="_blank"
+          rel="noopener noreferrer">
+          ☕ Buy me a coffee
+        </a>
+        <span className={css.support}>
+          <a
+            href="https://github.com/motaz1993"
+            target="_blank"
+            rel="noreferrer">
+            github.com/motaz1993
+          </a>
+        </span>
+        <span className={css.version}>v1.0.0</span>
+      </footer>
+    </div>
+  );
+}
